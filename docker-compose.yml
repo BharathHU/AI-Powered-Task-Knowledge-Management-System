@@ -1,0 +1,55 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: task_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: task_knowledge
+      MYSQL_USER: task_user
+      MYSQL_PASSWORD: task_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: task_backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://task_user:task_password@mysql:3306/task_knowledge
+      JWT_SECRET_KEY: change-me
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 120
+      CORS_ORIGINS: '["http://localhost:5173"]'
+      UPLOAD_DIR: /app/storage/uploads
+      INDEX_DIR: /app/storage/index
+      EMBEDDING_MODEL: sentence-transformers/all-MiniLM-L6-v2
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_uploads:/app/storage
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
+    container_name: task_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  mysql_data:
+  backend_uploads:
