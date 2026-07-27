@@ -1,3 +1,8 @@
+# File: services/activity_service.py
+# Audit-logging service that records user actions to the activity_logs
+# table. Called by auth, document, task, and search services to create
+# an immutable audit trail consumed by the analytics dashboard.
+
 import json
 
 from sqlalchemy.orm import Session
@@ -5,6 +10,9 @@ from sqlalchemy.orm import Session
 from app.models.activity_log import ActivityLog
 
 
+# Persists a structured activity record. Accepts an optional dict for
+# details (auto-serialised to JSON). Called after every significant
+# user-facing operation: login, register, upload, search, task CRUD.
 def log_activity(
     db: Session,
     *,

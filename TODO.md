@@ -19,7 +19,7 @@
   - Add missing closing `</div>` for `auth-shell` div in login/register block
   - Add missing closing `</div>` for the first Tasks `panel` div before `side-column` in dashboard block
 - [ ] Restart backend and frontend to apply changes
-- [ ] Test admin login: admin@example.com / admin123
+- [ ] Test admin login: admin@gmail.com / admin123
 - [ ] Test user registration with new email
 - [ ] Test user login after registration
 - [ ] Test task creation, search, document upload

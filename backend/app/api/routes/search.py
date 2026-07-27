@@ -1,3 +1,8 @@
+# File: api/routes/search.py
+# Semantic search route handler. Accepts a natural-language query and
+# returns the most relevant document chunks from the FAISS vector index.
+# Available to all authenticated users.
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -9,6 +14,8 @@ from app.services.search_service import semantic_search
 router = APIRouter()
 
 
+# POST /search — performs a semantic (vector) search across all indexed
+# document chunks and logs the query for analytics tracking.
 @router.post("", response_model=list[SearchResult])
 def search_documents(payload: SearchRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)) -> list[SearchResult]:
     results = semantic_search(payload.query, payload.top_k)

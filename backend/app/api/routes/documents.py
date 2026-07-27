@@ -1,3 +1,8 @@
+# File: api/routes/documents.py
+# Document-management route handlers: upload and list documents.
+# Both endpoints require admin privileges due to the sensitivity
+# of knowledge-base content ingestion.
+
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import selectinload
@@ -10,6 +15,8 @@ from app.services.document_service import create_document
 router = APIRouter()
 
 
+# POST /documents — uploads a PDF/TXT file, extracts text, chunks it,
+# and indexes it into the FAISS vector store (admin only).
 @router.post("", response_model=DocumentRead, dependencies=[Depends(require_role("admin"))])
 def upload_document(
     title: str = Form(...),
@@ -23,6 +30,7 @@ def upload_document(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
+# GET /documents — lists all uploaded documents with uploader info (admin only).
 @router.get("", response_model=list[DocumentRead], dependencies=[Depends(require_role("admin"))])
 def list_documents(db: Session = Depends(get_db)) -> list[DocumentRead]:
     from app.models.document import Document

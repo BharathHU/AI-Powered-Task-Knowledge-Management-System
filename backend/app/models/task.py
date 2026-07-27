@@ -1,3 +1,8 @@
+# File: models/task.py
+# ORM model for the tasks table. Implements the task-management feature
+# where admins can create and assign tasks, and users can update the
+# status of tasks assigned to them.
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, Text
@@ -6,6 +11,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 
+# Core entity for the task-management domain. Tasks have a lifecycle of
+# "pending" → "completed". Non-admin users can only see/update tasks
+# that are assigned to them (enforced at the service layer).
 class Task(Base):
     __tablename__ = "tasks"
 
