@@ -57,3 +57,20 @@ def update_task_status(db: Session, *, current_user: User, task_id: int, status:
     task = _reload_task(db, task)
     log_activity(db, user_id=current_user.id, action="task_update", entity_type="task", entity_id=str(task.id), details={"status": status})
     return task
+
+
+def delete_task(db: Session, *, current_user: User, task_id: int) -> None:
+    """Delete a task. Only admins may delete tasks.
+
+    Raises ValueError if the task does not exist, PermissionError if the
+    current user is not allowed to perform the deletion.
+    """
+    task = db.get(Task, task_id)
+    if task is None:
+        raise ValueError("Task not found")
+    if current_user.role.name != "admin":
+        raise PermissionError("Not allowed to delete this task")
+    # remove the task and log the activity
+    db.delete(task)
+    db.commit()
+    log_activity(db, user_id=current_user.id, action="task_delete", entity_type="task", entity_id=str(task_id))

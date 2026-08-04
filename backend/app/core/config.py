@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 120
 
     # Default admin credentials (used during bootstrap seeding)
-    admin_email: str = "admin@gmail.com.com"
+    admin_email: str = "admin@gmail.com"
     admin_password: str = "admin123"
 
     # CORS — allowed origins for the frontend dev server

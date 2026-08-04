@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_user, require_role
 from app.schemas.task import TaskCreateRequest, TaskRead, TaskStatusUpdateRequest
 from app.services.task_service import create_task, list_tasks, update_task_status
+from app.services.task_service import delete_task
 
 router = APIRouter()
 
@@ -36,6 +37,17 @@ def post_task(payload: TaskCreateRequest, db: Session = Depends(get_db), current
 def patch_task_status(task_id: int, payload: TaskStatusUpdateRequest, db: Session = Depends(get_db), current_user=Depends(get_current_user)) -> TaskRead:
     try:
         return update_task_status(db, current_user=current_user, task_id=task_id, status=payload.status)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from None
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from None
+
+
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_role("admin"))])
+def delete_task_route(task_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)) -> None:
+    try:
+        delete_task(db, current_user=current_user, task_id=task_id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from None
     except PermissionError as exc:

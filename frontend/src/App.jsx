@@ -166,6 +166,18 @@ function App() {
     }
   }
 
+const handleTaskDelete = async (taskId) => {
+    setBusy(true)
+    try {
+      await api.deleteTask(taskId)
+      await loadDashboard()
+    } catch (error) {
+      setMessage(error.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const stats = useMemo(() => {
     if (!analytics) {
       return []
@@ -278,9 +290,9 @@ function App() {
             <h2>Tasks</h2>
             <div className="filters">
               <select value={taskFilters.status} onChange={(event) => setTaskFilters({ ...taskFilters, status: event.target.value })}>
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
+                <option value=""  style={{backgroundColor:'darkblue'}}>All</option>
+                <option value="pending"  style={{backgroundColor:'darkblue'}}>Pending</option>
+                <option value="completed"  style={{backgroundColor:'darkblue'}}>Completed</option>
               </select>
               <input
                 placeholder="assigned_to"
@@ -305,13 +317,18 @@ function App() {
                   <h3>{task.title}</h3>
                   <p>{task.description}</p>
                 </div>
-                <div className="task-meta">
-                  <span>Assigned: {task.assigned_to || 'Unassigned'}</span>
-                  <span>Created by: {task.created_by}</span>
+<div className="task-meta">
+                  <span>Assigned: {task.assigned_to_user ? `${task.assigned_to_user.name} (ID: ${task.assigned_to})` : 'Unassigned'}</span>
+                  <span>Created by: {task.created_by_user?.name || task.created_by}</span>
                 </div>
                 {task.status !== 'completed' ? (
                   <button className="secondary" disabled={busy} onClick={() => handleTaskComplete(task.id)}>
                     Mark completed
+                  </button>
+                ) : null}
+                {isAdmin ? (
+                  <button className="danger" disabled={busy} onClick={() => handleTaskDelete(task.id)} style={{ marginLeft: 8 }}>
+                    Delete
                   </button>
                 ) : null}
               </article>
@@ -389,3 +406,4 @@ function App() {
 }
 
 export default App
+

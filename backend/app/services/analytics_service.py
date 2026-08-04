@@ -1,4 +1,3 @@
-# File: services/analytics_service.py
 # Provides aggregated statistics for the admin analytics dashboard.
 # Computes task counts (total / completed / pending) and identifies
 # the top 5 most frequent search queries from activity logs.

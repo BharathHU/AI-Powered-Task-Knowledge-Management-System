@@ -17,9 +17,6 @@ class RegisterRequest(ORMBaseModel):
     name: str
     email: str
     password: str
-
-
-# Returned by login and register; contains the JWT for subsequent requests.
 class TokenResponse(ORMBaseModel):
     access_token: str
     token_type: str = "bearer"

@@ -20,6 +20,10 @@ async function request(path, options = {}) {
     throw new Error(errorPayload.detail || 'Request failed')
   }
 
+  if (response.status === 204) {
+    return null
+  }
+
   return response.json()
 }
 
@@ -39,6 +43,7 @@ export const api = {
   },
   createTask: (payload) => request('/tasks', { method: 'POST', body: JSON.stringify(payload) }),
   updateTaskStatus: (taskId, payload) => request(`/tasks/${taskId}/status`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteTask: (taskId) => request(`/tasks/${taskId}`, { method: 'DELETE' }),
   documents: () => request('/documents'),
   uploadDocument: (formData) => request('/documents', { method: 'POST', body: formData }),
   search: (payload) => request('/search', { method: 'POST', body: JSON.stringify(payload) }),
