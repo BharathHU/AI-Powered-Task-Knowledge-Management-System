@@ -7,6 +7,7 @@ const emptyTask = { title: '', description: '', assigned_to: '' }
 const emptySearch = { query: '', top_k: 5 }
 
 function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
   const [token, setToken] = useState(() => localStorage.getItem('token') || '')
   const [user, setUser] = useState(null)
   const [showRegister, setShowRegister] = useState(false)
@@ -25,6 +26,13 @@ function App() {
   const [busy, setBusy] = useState(false)
 
   const isAdmin = user?.role?.name === 'admin'
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')
 
   const loadDashboard = async () => {
     const taskRequests = [api.tasks(taskFilters)]
@@ -192,6 +200,9 @@ const handleTaskDelete = async (taskId) => {
   if (!user) {
     return (
       <div className="auth-shell">
+        <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        </button>
         <div className="auth-card">
           <p className="eyebrow">AI Task & Knowledge</p>
           {showRegister ? (
@@ -257,9 +268,14 @@ const handleTaskDelete = async (taskId) => {
           <h1>Task operations, semantic search, and analytics in one dashboard.</h1>
           <p className="muted">Signed in as {user.name} · {user.role.name}</p>
         </div>
-        <button
-          className="secondary"
-          onClick={() => {
+        <div className="hero-actions">
+          <button className="secondary" type="button" onClick={toggleTheme}>
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
+          <button
+            className="secondary"
+            type="button"
+            onClick={() => {
             localStorage.removeItem('token')
             setToken('')
             setUser(null)
@@ -267,10 +283,11 @@ const handleTaskDelete = async (taskId) => {
             setDocuments([])
             setAnalytics(null)
             setSearchResults([])
-          }}
-        >
-          Log out
-        </button>
+            }}
+          >
+            Log out
+          </button>
+        </div>
       </header>
 
       {message ? <div className="notice">{message}</div> : null}
@@ -290,9 +307,9 @@ const handleTaskDelete = async (taskId) => {
             <h2>Tasks</h2>
             <div className="filters">
               <select value={taskFilters.status} onChange={(event) => setTaskFilters({ ...taskFilters, status: event.target.value })}>
-                <option value=""  style={{backgroundColor:'darkblue'}}>All</option>
-                <option value="pending"  style={{backgroundColor:'darkblue'}}>Pending</option>
-                <option value="completed"  style={{backgroundColor:'darkblue'}}>Completed</option>
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
               </select>
               <input
                 placeholder="assigned_to"
@@ -310,7 +327,7 @@ const handleTaskDelete = async (taskId) => {
             </form>
           ) : null}
           <div className="card-list">
-            {tasks.map((task) => (
+            {tasks.length ? tasks.map((task) => (
               <article key={task.id} className="task-card">
                 <div>
                   <span className={`pill ${task.status}`}>{task.status}</span>
@@ -332,7 +349,7 @@ const handleTaskDelete = async (taskId) => {
                   </button>
                 ) : null}
               </article>
-            ))}
+            )) : <p className="empty-state">No tasks match these filters.</p>}
           </div>
         </div>
 
@@ -347,13 +364,13 @@ const handleTaskDelete = async (taskId) => {
               <button disabled={busy} type="submit">Search</button>
             </form>
             <div className="card-list">
-              {searchResults.map((result, index) => (
+              {searchResults.length ? searchResults.map((result, index) => (
                 <article key={`${result.document_id}-${index}`} className="result-card">
                   <span className="pill accent">{result.document_title}</span>
                   <p>{result.chunk_text}</p>
                   <small>Score {result.score.toFixed(3)}</small>
                 </article>
-              ))}
+              )) : <p className="empty-state">Search your uploaded knowledge to see relevant passages.</p>}
             </div>
           </div>
 
@@ -368,12 +385,12 @@ const handleTaskDelete = async (taskId) => {
                 <button disabled={busy} type="submit">Upload</button>
               </form>
               <div className="card-list">
-                {documents.map((document) => (
+                {documents.length ? documents.map((document) => (
                   <article key={document.id} className="result-card">
                     <strong>{document.title}</strong>
                     <small>{document.file_name}</small>
                   </article>
-                ))}
+                )) : <p className="empty-state">No documents uploaded yet.</p>}
               </div>
             </div>
           ) : null}

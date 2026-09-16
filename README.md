@@ -233,7 +233,7 @@ npm run dev
 
 ```
 Email:
-admin@example.com
+      admin@example.com
 
 Password:
 admin123
